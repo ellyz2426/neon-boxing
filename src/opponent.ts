@@ -2,6 +2,7 @@ import { Group, Mesh, MeshStandardMaterial, SphereGeometry, CapsuleGeometry, Vec
 import { OpponentState } from './types';
 
 export class Opponent {
+  isTraining = false;
   group = new Group();
   body: Mesh;
   head: Mesh;
@@ -50,6 +51,15 @@ export class Opponent {
       if (this.state.stunTime <= 0) {
         this.state.isStunned = false;
       }
+      return;
+    }
+
+    if (this.isTraining) {
+      // Dummy bobbing
+      const time = performance.now() * 0.002;
+      this.group.position.y = Math.sin(time * 1.5) * 0.02;
+      this.head.position.y = 1.55 + Math.sin(time * 2) * 0.01;
+      this.state.isBlocking = false;
       return;
     }
 
@@ -133,5 +143,17 @@ export class Opponent {
     this.state.isBlocking = false;
     this.state.isStunned = false;
     this.group.position.set(0, 0, -1.2);
+  }
+
+  setTraining(training: boolean) {
+    this.isTraining = training;
+    const mat = this.body.material as MeshStandardMaterial;
+    if (training) {
+      mat.color.setHex(0x4488ff);
+      mat.emissive.setHex(0x2266ff);
+    } else {
+      mat.color.setHex(0xff3366);
+      mat.emissive.setHex(0xff0066);
+    }
   }
 }
